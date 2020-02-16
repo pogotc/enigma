@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "lint:js": "./node_modules/.bin/eslint .",
+    "test": "NODE_ENV=test ./node_modules/.bin/jest --forceExit --detectOpenHandles --verbose --maxWorkers=1"
   },
   "keywords": [],
   "author": "",

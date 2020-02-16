@@ -49,17 +49,18 @@ const combineRotorsWithTurnovers = (rotors, positions) => {
 };
 
 const step = (engima) => {
-  const stepRotors = (rotors, step) => {
+  const stepRotors = (rotors, previousStepTurnedOver) => {
     if (rotors.length === 0) {
       return [];
     }
 
-    const isMiddleRotor = rotors.length == 2;
+    const isMiddleRotor = rotors.length === 2;
     const rotor = R.head(rotors);
     let hitTurnover;
+    let doStep = previousStepTurnedOver;
 
     if (isMiddleRotor && rotor.position === rotor.turnover) {
-      step = true;
+      doStep = true;
       hitTurnover = true;
     } else if (!isMiddleRotor) {
       hitTurnover = rotor.position === rotor.turnover;
@@ -68,7 +69,7 @@ const step = (engima) => {
     return R.concat(
       [{
         ...rotor,
-        position: step ? (rotor.position + 1) % 26 : rotor.position,
+        position: doStep ? (rotor.position + 1) % 26 : rotor.position,
       }],
       stepRotors(R.tail(rotors), hitTurnover),
     );
@@ -90,7 +91,7 @@ const step = (engima) => {
 };
 
 const stepBackwards = (engima) => {
-  const stepRotorsBackwards = (rotors, step, willDoubleStep) => {
+  const stepRotorsBackwards = (rotors, previousStepTurnedOver, previousRotorWillDoubleStep) => {
     if (rotors.length === 0) {
       return [];
     }
@@ -99,24 +100,34 @@ const stepBackwards = (engima) => {
     const isLastRotor = rotors.length === 3;
     const rotor = R.head(rotors);
     let hitTurnover;
+    let doStep = previousStepTurnedOver;
 
     if (isMiddleRotor) {
-      if ((willDoubleStep || step) && rotor.position - 1 === rotor.turnover) {
+      if ((previousRotorWillDoubleStep || doStep) && rotor.position - 1 === rotor.turnover) {
         hitTurnover = true;
-        step = true;
+        doStep = true;
       } else if (rotor.position === rotor.turnover) {
-        step = true;
+        doStep = true;
       }
     } else if (rotor.position - 1 === rotor.turnover) {
       hitTurnover = true;
     }
+
+    let willDoubleStep = previousRotorWillDoubleStep;
+
     if (isLastRotor && rotor.position - 2 === rotor.turnover) {
       willDoubleStep = true;
     }
 
+    let nextPosition = rotor.position;
+
+    if (doStep) {
+      nextPosition = rotor.position === 0 ? 25 : rotor.position - 1;
+    }
+
     return R.concat([{
       ...rotor,
-      position: step ? (rotor.position === 0 ? 25 : rotor.position - 1) : rotor.position,
+      position: nextPosition,
     }], stepRotorsBackwards(R.tail(rotors), hitTurnover, willDoubleStep));
   };
 
