@@ -4,18 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "./node_modules/.bin/tsc",
+    "build:watch": "onchange 'src/**/*.ts' -- npm run build",
     "lint:js": "./node_modules/.bin/eslint .",
-    "test": "NODE_ENV=test ./node_modules/.bin/jest --forceExit --detectOpenHandles --verbose --maxWorkers=1"
+    "test": "NODE_ENV=test ./node_modules/.bin/jest --forceExit --detectOpenHandles --verbose --maxWorkers=1",
+    "test:watch": "NODE_ENV=test ./node_modules/.bin/jest --coverage --watchAll"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^25.1.3",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jest": "^23.7.0",
-    "jest": "^25.1.0"
+    "jest": "^25.1.0",
+    "onchange": "^6.1.0",
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.2"
   },
   "dependencies": {
     "ramda": "^0.27.0"
