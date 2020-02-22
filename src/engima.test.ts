@@ -21,6 +21,13 @@ describe('Stepping', () => {
         });
     });
 
+    const doSteps = (engimaUnderTest, steps): Enigma => {
+        if (steps === 0) {
+            return engimaUnderTest;
+        }
+        return doSteps(step(engimaUnderTest), steps - 1);
+    };
+
     describe('forward', () => {
         test('simple steps', () => {
             expect(engima.rotorPositions).toEqual([0, 0, 0]);
@@ -62,16 +69,23 @@ describe('Stepping', () => {
         });
 
         test('repeated presses', () => {
-            const doSteps = (engimaUnderTest, steps): Enigma => {
-                if (steps === 0) {
-                    return engimaUnderTest;
-                }
-                return doSteps(step(engimaUnderTest), steps - 1);
-            };
             const enigmaToTest = setRotorPosition(engima, [0, 0, 0]);
             const afterEncoding = doSteps(enigmaToTest, 200);
 
             expect(afterEncoding.rotorPositions).toEqual([1, 8, 18]); // B I S
+        });
+
+        test("rotors that don't move", () => {
+            // the Rotor.M4.GAMMA does not move
+
+            engima = createEnigma({
+                rotors: [Rotor.M4.GAMMA, Rotor.M3.II, Rotor.M3.III],
+                reflector: Reflector.A,
+            });
+            const enigmaToTest = setRotorPosition(engima, [0, 0, 0]);
+            const afterEncoding = doSteps(enigmaToTest, 200);
+
+            expect(afterEncoding.rotorPositions).toEqual([0, 8, 18]); // A I S
         });
     });
 

@@ -4,7 +4,7 @@
         "allowJs": true,
         "target": "es5",
         "module": "commonjs",
-        "lib": ["es6"],
+        "lib": ["es6", "dom"],
         "sourceMap": true
     },
     "include": [

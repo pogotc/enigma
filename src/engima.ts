@@ -17,20 +17,31 @@ const Rotor = {
         II: 'M3_II',
         III: 'M3_III',
     },
+    M4: {
+        GAMMA: 'M4_GAMMA',
+    },
 };
 
 const RotorConfig = {
     M3_I: {
         wires: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ',
         turnover: ['Q'],
+        rotates: true,
     },
     M3_II: {
         wires: 'AJDKSIRUXBLHWTMCQGZNPYFVOE',
         turnover: ['E'],
+        rotates: true,
     },
     M3_III: {
         wires: 'BDFHJLCPRTXVZNYEIWGAKMUSQO',
         turnover: ['V'],
+        rotates: true,
+    },
+    M4_GAMMA: {
+        wires: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ',
+        turnover: ['Q'],
+        rotates: false,
     },
 };
 
@@ -46,6 +57,7 @@ const createEnigma = (setup): Enigma => ({
 
 const letterToRotorPos = (x: string): number => x.charCodeAt(0) - 'A'.charCodeAt(0);
 const turnoversForRotor = (rotor: string): Array<number> => RotorConfig[rotor].turnover;
+const canRotate = (rotor: string): boolean => RotorConfig[rotor].rotates;
 
 /*
  *  Given a series of rotors (e.g. M3_I, M3_II, M3_III)
@@ -62,9 +74,14 @@ const combineRotorsWithTurnovers = (rotors, positions): RotorWithTurnoverPos => 
     // Convert the letters to numerical positions
     // so a -> 0, b -> 1, c -> 2 etc
     const turnoverPositions = R.map(x => R.map(letterToRotorPos, x), turnoverLettersForRotors);
+    const positionsWithTurnovers = R.zipWith(
+        (position, turnover) => ({ position, turnover: turnover }),
+        positions,
+        turnoverPositions,
+    );
 
     // Combine everything so we get our final result
-    return R.zipWith((position, turnover) => ({ position, turnover: turnover }), positions, turnoverPositions);
+    return R.zipWith((rotor, data) => ({ ...data, rotor }), rotors, positionsWithTurnovers);
 };
 
 const step = (engima: Enigma): Enigma => {
@@ -86,6 +103,10 @@ const step = (engima: Enigma): Enigma => {
             hitTurnover = true;
         } else if (!isMiddleRotor) {
             hitTurnover = hasHitTurnoverPosition(rotor.position);
+        }
+
+        if (!canRotate(rotor.rotor)) {
+            doStep = false;
         }
 
         return R.concat(
