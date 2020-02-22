@@ -1,4 +1,4 @@
-import { createEnigma, step, setRotorPosition, stepBackwards, Rotor, Reflector } from './engima';
+import { createEnigma, encode, step, setRotorPosition, stepBackwards, Rotor, Reflector } from './engima';
 import { Enigma } from './engima';
 
 test('can initialise the engima', () => {
@@ -153,5 +153,25 @@ describe('Stepping', () => {
 
             expect(afterEncoding.rotorPositions).toEqual([0, 0, 0]); // A A A
         });
+    });
+});
+
+describe('encrypting', () => {
+    const engima = createEnigma({
+        rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+        reflector: Reflector.B,
+    });
+    test('can do a simple encipherment', () => {
+        const repeatEncode = (engima, letter: string, timesToEncode: number): string => {
+            if (timesToEncode === 0) {
+                return '';
+            }
+            const stepped = step(engima);
+            const output = encode(stepped, letter);
+            return output + repeatEncode(stepped, letter, timesToEncode - 1);
+        };
+
+        const testOutput = repeatEncode(engima, 'A', 4);
+        expect(testOutput).toEqual('BDZG');
     });
 });
