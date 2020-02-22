@@ -160,6 +160,10 @@ const stepBackwards = (engima: Enigma): Enigma => {
             hitTurnover = true;
         }
 
+        if (!canRotate(rotor.rotor)) {
+            doStep = false;
+        }
+
         let willDoubleStep = previousRotorWillDoubleStep;
 
         if (isLastRotor && hasHitTurnoverPosition(rotor.position - 2)) {
