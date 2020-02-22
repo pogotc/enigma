@@ -1,4 +1,15 @@
-const R = require('ramda');
+import * as R from 'ramda'
+
+interface Enigma {
+  rotors: Array<any>,
+  reflector: String,
+  rotorPositions: Array<number>,
+}
+
+interface RotorWithTurnoverPos {
+  position: String,         // The rotor position, between 0-25
+  turnover: Array<number>   // The turnover positions
+}
 
 const Rotor = {
   M3: {
@@ -27,28 +38,36 @@ const Reflector = {
   A: 'EJMZALYXVBWFCRQUONTSPIKHGD',
 };
 
-const createEnigma = (setup) => ({
+const createEnigma = (setup): Enigma => ({
   rotors: setup.rotors,
   reflector: setup.reflector,
   rotorPositions: [0, 0, 0],
 });
 
-const letterToRotorPos = (x) => x.charCodeAt(0) - 'A'.charCodeAt(0);
+const letterToRotorPos = (x: string): number => x.charCodeAt(0) - 'A'.charCodeAt(0);
+const turnoversForRotor = (rotor: string): Array<number> => RotorConfig[rotor].turnover;
 
-const turnoverForRotor = (rotor) => RotorConfig[rotor].turnover[0];
+/*
+*  Given a series of rotors (e.g. M3_I, M3_II, M3_III)
+*  and an array of rotor positions
+*  it will produces an array of elements like this:
+*  { position: 0, turnover: [16, 24] }
+*  which would indicate our rotor is at postiion 0
+*  and will turnover at positions 16 and 24
+*/
+const combineRotorsWithTurnovers = (rotors, positions): RotorWithTurnoverPos => {
+  // Grab all the turnover letters from the config for the rotors being used
+  const turnoverLettersForRotors = R.map(turnoversForRotor, rotors);
 
-const combineRotorsWithTurnovers = (rotors, positions) => {
-  const getRotorTurnovers = R.compose(
-    letterToRotorPos,
-    turnoverForRotor,
-  );
+  // Convert the letters to numerical positions
+  // so a -> 0, b -> 1, c -> 2 etc
+  const turnoverPositions = R.map(x => R.map(letterToRotorPos, x), turnoverLettersForRotors)
 
-  const turnoverPositions = R.map(getRotorTurnovers, rotors);
-
-  return R.zipWith((position, turnover) => ({ position, turnover }), positions, turnoverPositions);
+  // Combine everything so we get our final result
+  return R.zipWith((position, turnover) => ({ position, turnover: turnover }), positions, turnoverPositions);
 };
 
-const step = (engima) => {
+const step = (engima: Enigma): Enigma => {
   const stepRotors = (rotors, previousStepTurnedOver) => {
     if (rotors.length === 0) {
       return [];
@@ -59,11 +78,14 @@ const step = (engima) => {
     let hitTurnover;
     let doStep = previousStepTurnedOver;
 
-    if (isMiddleRotor && rotor.position === rotor.turnover) {
+    const turnoverPositions = rotor.turnover;
+    const hasHitTurnoverPosition = position => turnoverPositions.indexOf(position) != -1;
+
+    if (isMiddleRotor && hasHitTurnoverPosition(rotor.position)) {
       doStep = true;
       hitTurnover = true;
     } else if (!isMiddleRotor) {
-      hitTurnover = rotor.position === rotor.turnover;
+      hitTurnover = hasHitTurnoverPosition(rotor.position);
     }
 
     return R.concat(
@@ -90,7 +112,7 @@ const step = (engima) => {
   };
 };
 
-const stepBackwards = (engima) => {
+const stepBackwards = (engima: Enigma): Enigma => {
   const stepRotorsBackwards = (rotors, previousStepTurnedOver, previousRotorWillDoubleStep) => {
     if (rotors.length === 0) {
       return [];
@@ -101,21 +123,23 @@ const stepBackwards = (engima) => {
     const rotor = R.head(rotors);
     let hitTurnover;
     let doStep = previousStepTurnedOver;
+    const turnoverPositions = rotor.turnover;
+    const hasHitTurnoverPosition = position => turnoverPositions.indexOf(position) != -1;
 
     if (isMiddleRotor) {
-      if ((previousRotorWillDoubleStep || doStep) && rotor.position - 1 === rotor.turnover) {
+      if ((previousRotorWillDoubleStep || doStep) && hasHitTurnoverPosition(rotor.position - 1)) {
         hitTurnover = true;
         doStep = true;
-      } else if (rotor.position === rotor.turnover) {
+      } else if (hasHitTurnoverPosition(rotor.position)) {
         doStep = true;
       }
-    } else if (rotor.position - 1 === rotor.turnover) {
+    } else if (hasHitTurnoverPosition(rotor.position - 1)) {
       hitTurnover = true;
     }
 
     let willDoubleStep = previousRotorWillDoubleStep;
 
-    if (isLastRotor && rotor.position - 2 === rotor.turnover) {
+    if (isLastRotor && hasHitTurnoverPosition(rotor.position - 2)) {
       willDoubleStep = true;
     }
 
@@ -146,13 +170,13 @@ const stepBackwards = (engima) => {
   };
 };
 
-const setRotorPosition = (enigma, rotorPositions) => ({
+const setRotorPosition = (enigma: Enigma, rotorPositions: Array<number>): Enigma => ({
   ...enigma,
   rotorPositions,
 });
 
 
-module.exports = {
+export {
   createEnigma,
   step,
   setRotorPosition,

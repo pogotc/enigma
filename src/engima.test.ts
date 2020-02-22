@@ -1,12 +1,12 @@
 
-const {
+import {
   createEnigma,
   step,
   setRotorPosition,
   stepBackwards,
   Rotor,
   Reflector,
-} = require('./engima');
+} from './engima';
 
 test('can initialise the engima', () => {
   const engima = createEnigma({
