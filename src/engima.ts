@@ -4,6 +4,7 @@ export interface Enigma {
     rotors: Array<string>;
     reflector: string;
     rotorPositions: Array<number>;
+    ringSettings: Array<number>;
 }
 
 interface RotorWithTurnoverPos {
@@ -55,7 +56,8 @@ const Reflector = {
 const createEnigma = (setup): Enigma => ({
     rotors: setup.rotors,
     reflector: setup.reflector,
-    rotorPositions: [0, 0, 0],
+    rotorPositions: setup.rotorPositions || [0, 0, 0],
+    ringSettings: setup.ringSettings || [1, 1, 1]
 });
 
 const letterToRotorPos = (x: string): number => x.charCodeAt(0) - 'A'.charCodeAt(0);
@@ -68,6 +70,8 @@ const clampToRotorRange = (n: number): number => {
     }
     return n % 26;
 };
+
+const isEncodeable = (x: string): boolean => x.match(/[a-zA-Z]/) !== null;
 
 /*
  *  Given a series of rotors (e.g. M3_I, M3_II, M3_III)
@@ -235,19 +239,35 @@ const getLeftToRightWireMapping = (rotor: string): object => {
     );
 };
 
+const zip3 = (a, b, c) => {
+    const aHead = R.head(a);
+    const bHead = R.head(b);
+    const cHead = R.head(c);
+    if (aHead === undefined || bHead === undefined || cHead === undefined) {
+        return [];
+    }
+
+    return R.prepend([aHead, bHead, cHead], zip3(R.tail(a), R.tail(b), R.tail(c)));
+}
+
 const encode = (engima: Enigma, letter: string): string => {
-    const rotorsWithPositions = R.zip(engima.rotors, engima.rotorPositions);
+    const rotorsWithPositions = zip3(engima.rotors, engima.rotorPositions, engima.ringSettings);
+
+    if (!isEncodeable(letter)) {
+        return '';
+    }
 
     const encode = (rotors, wireLookupFn, input): string => {
         if (rotors.length === 0) {
             return input;
         }
-        const [rotorName, rotorPosition] = R.head(rotors);
+        const [rotorName, rotorPosition, ringSetting] = R.head(rotors);
         const wireMapping = wireLookupFn(rotorName);
-        const inputWithRotorOffset = clampToRotorRange(input + rotorPosition);
+
+        const inputWithRotorOffset = clampToRotorRange(input + rotorPosition - (ringSetting - 1));
 
         const out = wireMapping[inputWithRotorOffset];
-        return encode(R.tail(rotors), wireLookupFn, clampToRotorRange(out - rotorPosition));
+        return encode(R.tail(rotors), wireLookupFn, clampToRotorRange(out - rotorPosition + (ringSetting - 1)));
     };
 
     const reflect = (reflector, input): string => {
@@ -267,7 +287,20 @@ const encode = (engima: Enigma, letter: string): string => {
         letterToRotorPos,
     );
 
-    return performEncoding(letter);
+    return performEncoding(letter.toUpperCase());
 };
 
-export { createEnigma, encode, step, setRotorPosition, stepBackwards, Rotor, Reflector };
+const encodeString = (enigma: Enigma, input: string): string => {
+    const sanitisedInput = input.split('').filter(isEncodeable).join('');
+    return performStringEncode(enigma, sanitisedInput);
+}
+
+const performStringEncode = (enigma: Enigma, input: string): string => {
+    if (input === '') {
+        return '';
+    }
+    const steppedEncoder = step(enigma);
+    return encode(steppedEncoder, R.head(input)) + performStringEncode(steppedEncoder, R.tail(input));
+}
+
+export { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards, Rotor, Reflector };

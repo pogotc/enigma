@@ -1,4 +1,4 @@
-import { createEnigma, encode, step, setRotorPosition, stepBackwards, Rotor, Reflector } from './engima';
+import { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards, Rotor, Reflector } from './engima';
 import { Enigma } from './engima';
 
 test('can initialise the engima', () => {
@@ -156,22 +156,98 @@ describe('Stepping', () => {
     });
 });
 
-describe('encrypting', () => {
+describe('Encrypting / Decrypting', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.B,
     });
     test('can do a simple encipherment', () => {
-        const repeatEncode = (engima, letter: string, timesToEncode: number): string => {
-            if (timesToEncode === 0) {
-                return '';
-            }
-            const stepped = step(engima);
-            const output = encode(stepped, letter);
-            return output + repeatEncode(stepped, letter, timesToEncode - 1);
-        };
-
-        const testOutput = repeatEncode(engima, 'A', 4);
+        const testOutput = encodeString(engima, 'AAAA');
         expect(testOutput).toEqual('BDZG');
+    });
+
+    test('can do a simple decipherment', () => {
+        const testOutput = encodeString(engima, 'BDZG');
+        expect(testOutput).toEqual('AAAA');
+    });
+});
+
+
+describe('Modified ring settings', () => {
+    const engima = createEnigma({
+        rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+        reflector: Reflector.B,
+        ringSettings: [1, 1, 2]
+    });
+
+    test('can do a simple encipherment', () => {
+        const testOutput = encodeString(engima, 'AAAAA');
+        expect(testOutput).toEqual('UBDZG');
+    });
+
+    test('can do a simple decipherment', () => {
+        const testOutput = encodeString(engima, 'UBDZG');
+        expect(testOutput).toEqual('AAAAA');
+    });
+});
+
+describe('Character sanitisation', () => {
+    const engima = step(createEnigma({
+        rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+        reflector: Reflector.B,
+        ringSettings: [1, 1, 1]
+    }));
+
+    test('lowercase characters are converted to uppercase', () => {
+        expect(encode(engima, 'a')).toEqual('B');
+    });
+    test('numbers are ignored', () => {
+        expect(encode(engima, '3')).toEqual('');
+    });
+    test('punctuation is ignored', () => {
+        expect(encode(engima, '.')).toEqual('');
+        expect(encode(engima, ',')).toEqual('');
+        expect(encode(engima, '*')).toEqual('');
+    });
+});
+
+
+describe('Text sanitisation', () => {
+    const engima = createEnigma({
+        rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+        reflector: Reflector.B,
+        ringSettings: [1, 1, 1]
+    });
+
+    test('lowercase characters are converted to uppercase', () => {
+        const testOutput = encodeString(engima, 'aaaa');
+        expect(testOutput).toEqual('BDZG');
+    });
+    test('non alpha characters are skipped', () => {
+        const testOutput = encodeString(engima, 'AA.AA');
+        expect(testOutput).toEqual('BDZG');
+    });
+});
+
+describe('Misc tests', () => {
+    test('text one', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.II, Rotor.M3.III, Rotor.M3.I],
+            reflector: Reflector.B,
+            ringSettings: [7, 18, 10],
+            rotorPositions: [19, 18, 19]
+        });
+        const testOutput = encodeString(engima, 'TESTING');
+        expect(testOutput).toEqual('IKMIJGR');
+    });
+    test('text two', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.II, Rotor.M3.I, Rotor.M3.III],
+            reflector: Reflector.B,
+            ringSettings: [7, 10, 18],
+            rotorPositions: [3, 4, 20]
+        });
+        const testOutput = encodeString(engima, 'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM');
+        expect(testOutput).toEqual('THQCFRKJOJRRAEUVHOQUOUGLBWNPUXQXGNJVHRBXUAHOAPKGDQCXZQIANARSIOUFQOTYKSRPEDSXDITKCOTNUEKJQBBGGBLDYEGRGEMLGMLQURKMAYKKGMPXPHEMQFSDEUAXGQSBZLWZQCNLTTTEOBLCLLVPYKBDFHAKTCQVMMYZWYOWTENWPNYEAPFKBIYNWZAZKLFRETBLNTYQCCWFSCQVSPGBRYCVRZIATVGIVOLPIGWQPNVZMGEULBXPHPMXVVPRDXCRZYDRUZRNYEENWZFUIZQNXAETRCYSNJPRZWADTEWNJJXTZOXYQAXXOPMOHCDEKKMEITXPHXYVMOJMRAOJVWBIFDTNKHAAZPITHERNRIWQJ');
     });
 });
