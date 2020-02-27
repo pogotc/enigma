@@ -172,12 +172,11 @@ describe('Encrypting / Decrypting', () => {
     });
 });
 
-
 describe('Modified ring settings', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.B,
-        ringSettings: [1, 1, 2]
+        ringSettings: [1, 1, 2],
     });
 
     test('can do a simple encipherment', () => {
@@ -192,11 +191,13 @@ describe('Modified ring settings', () => {
 });
 
 describe('Character sanitisation', () => {
-    const engima = step(createEnigma({
-        rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-        reflector: Reflector.B,
-        ringSettings: [1, 1, 1]
-    }));
+    const engima = step(
+        createEnigma({
+            rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+            reflector: Reflector.B,
+            ringSettings: [1, 1, 1],
+        }),
+    );
 
     test('lowercase characters are converted to uppercase', () => {
         expect(encode(engima, 'a')).toEqual('B');
@@ -211,12 +212,11 @@ describe('Character sanitisation', () => {
     });
 });
 
-
 describe('Text sanitisation', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.B,
-        ringSettings: [1, 1, 1]
+        ringSettings: [1, 1, 1],
     });
 
     test('lowercase characters are converted to uppercase', () => {
@@ -235,7 +235,7 @@ describe('Misc tests', () => {
             rotors: [Rotor.M3.II, Rotor.M3.III, Rotor.M3.I],
             reflector: Reflector.B,
             ringSettings: [7, 18, 10],
-            rotorPositions: [19, 18, 19]
+            rotorPositions: [19, 18, 19],
         });
         const testOutput = encodeString(engima, 'TESTING');
         expect(testOutput).toEqual('IKMIJGR');
@@ -245,9 +245,14 @@ describe('Misc tests', () => {
             rotors: [Rotor.M3.II, Rotor.M3.I, Rotor.M3.III],
             reflector: Reflector.B,
             ringSettings: [7, 10, 18],
-            rotorPositions: [3, 4, 20]
+            rotorPositions: [3, 4, 20],
         });
-        const testOutput = encodeString(engima, 'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM');
-        expect(testOutput).toEqual('THQCFRKJOJRRAEUVHOQUOUGLBWNPUXQXGNJVHRBXUAHOAPKGDQCXZQIANARSIOUFQOTYKSRPEDSXDITKCOTNUEKJQBBGGBLDYEGRGEMLGMLQURKMAYKKGMPXPHEMQFSDEUAXGQSBZLWZQCNLTTTEOBLCLLVPYKBDFHAKTCQVMMYZWYOWTENWPNYEAPFKBIYNWZAZKLFRETBLNTYQCCWFSCQVSPGBRYCVRZIATVGIVOLPIGWQPNVZMGEULBXPHPMXVVPRDXCRZYDRUZRNYEENWZFUIZQNXAETRCYSNJPRZWADTEWNJJXTZOXYQAXXOPMOHCDEKKMEITXPHXYVMOJMRAOJVWBIFDTNKHAAZPITHERNRIWQJ');
+        const testOutput = encodeString(
+            engima,
+            'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
+        );
+        expect(testOutput).toEqual(
+            'THQCFRKJOJRRAEUVHOQUOUGLBWNPUXQXGNJVHRBXUAHOAPKGDQCXZQIANARSIOUFQOTYKSRPEDSXDITKCOTNUEKJQBBGGBLDYEGRGEMLGMLQURKMAYKKGMPXPHEMQFSDEUAXGQSBZLWZQCNLTTTEOBLCLLVPYKBDFHAKTCQVMMYZWYOWTENWPNYEAPFKBIYNWZAZKLFRETBLNTYQCCWFSCQVSPGBRYCVRZIATVGIVOLPIGWQPNVZMGEULBXPHPMXVVPRDXCRZYDRUZRNYEENWZFUIZQNXAETRCYSNJPRZWADTEWNJJXTZOXYQAXXOPMOHCDEKKMEITXPHXYVMOJMRAOJVWBIFDTNKHAAZPITHERNRIWQJ',
+        );
     });
 });

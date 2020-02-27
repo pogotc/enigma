@@ -57,7 +57,7 @@ const createEnigma = (setup): Enigma => ({
     rotors: setup.rotors,
     reflector: setup.reflector,
     rotorPositions: setup.rotorPositions || [0, 0, 0],
-    ringSettings: setup.ringSettings || [1, 1, 1]
+    ringSettings: setup.ringSettings || [1, 1, 1],
 });
 
 const letterToRotorPos = (x: string): number => x.charCodeAt(0) - 'A'.charCodeAt(0);
@@ -239,7 +239,7 @@ const getLeftToRightWireMapping = (rotor: string): object => {
     );
 };
 
-const zip3 = (a, b, c) => {
+const zip3 = (a, b, c): Array<any> => {
     const aHead = R.head(a);
     const bHead = R.head(b);
     const cHead = R.head(c);
@@ -248,7 +248,7 @@ const zip3 = (a, b, c) => {
     }
 
     return R.prepend([aHead, bHead, cHead], zip3(R.tail(a), R.tail(b), R.tail(c)));
-}
+};
 
 const encode = (engima: Enigma, letter: string): string => {
     const rotorsWithPositions = zip3(engima.rotors, engima.rotorPositions, engima.ringSettings);
@@ -290,17 +290,20 @@ const encode = (engima: Enigma, letter: string): string => {
     return performEncoding(letter.toUpperCase());
 };
 
-const encodeString = (enigma: Enigma, input: string): string => {
-    const sanitisedInput = input.split('').filter(isEncodeable).join('');
-    return performStringEncode(enigma, sanitisedInput);
-}
-
 const performStringEncode = (enigma: Enigma, input: string): string => {
     if (input === '') {
         return '';
     }
     const steppedEncoder = step(enigma);
     return encode(steppedEncoder, R.head(input)) + performStringEncode(steppedEncoder, R.tail(input));
-}
+};
+
+const encodeString = (enigma: Enigma, input: string): string => {
+    const sanitisedInput = input
+        .split('')
+        .filter(isEncodeable)
+        .join('');
+    return performStringEncode(enigma, sanitisedInput);
+};
 
 export { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards, Rotor, Reflector };
