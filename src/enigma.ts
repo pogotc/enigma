@@ -11,7 +11,7 @@ export interface Enigma {
     reflector: string;
     rotorPositions: Array<number>;
     ringSettings: Array<number>;
-    plugs: Array<PlugPair>;
+    plugs: object;
 }
 
 interface RotorWithTurnoverPos {
@@ -21,7 +21,7 @@ interface RotorWithTurnoverPos {
 
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-const createPlugboardMap = plugs => {
+const createPlugboardMap = (plugs): object => {
     if (plugs.length === 0) {
         return {};
     }

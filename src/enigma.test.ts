@@ -351,13 +351,18 @@ describe('Misc tests', () => {
         );
     });
 
-    test('m4 -readme', () => {
+    test('M4 - All the settings', () => {
         const enigma = createEnigma({
             rotors: [Rotor.M4.BETA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
             reflector: Reflector.M4.B,
-            ringSettings: [20, 5, 19, 20],      // TEST
-            rotorPositions: [18, 2, 17, 19],    // SCRT
-            plugs: [['Q', 'A'], ['T', 'G'], ['E', 'N'], ['D', 'X']]
+            ringSettings: [20, 5, 19, 20], // TEST
+            rotorPositions: [18, 2, 17, 19], // SCRT
+            plugs: [
+                ['Q', 'A'],
+                ['T', 'G'],
+                ['E', 'N'],
+                ['D', 'X'],
+            ],
         });
 
         const testOutput = encodeString(enigma, 'ATTACKATDAWN');
