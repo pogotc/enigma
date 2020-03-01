@@ -1,51 +1,51 @@
-import { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards } from './engima';
+import { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards } from './enigma';
 import { Rotor, Reflector } from './rotors';
-import { Enigma } from './engima';
+import { Enigma } from './enigma';
 
-test('can initialise the engima', () => {
-    const engima = createEnigma({
+test('can initialise the enigma', () => {
+    const enigma = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.M3.A,
     });
 
-    expect(engima.rotors).toEqual([Rotor.M3.I, Rotor.M3.II, Rotor.M3.III]);
-    expect(engima.reflector).toEqual(Reflector.M3.A);
-    expect(engima.rotorPositions).toEqual([0, 0, 0]);
+    expect(enigma.rotors).toEqual([Rotor.M3.I, Rotor.M3.II, Rotor.M3.III]);
+    expect(enigma.reflector).toEqual(Reflector.M3.A);
+    expect(enigma.rotorPositions).toEqual([0, 0, 0]);
 });
 
 describe('Stepping', () => {
-    let engima;
+    let enigma;
     beforeEach(() => {
-        engima = createEnigma({
+        enigma = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
             reflector: Reflector.M3.A,
         });
     });
 
     describe('forward', () => {
-        const doSteps = (engimaUnderTest, steps): Enigma => {
+        const doSteps = (enigmaUnderTest, steps): Enigma => {
             if (steps === 0) {
-                return engimaUnderTest;
+                return enigmaUnderTest;
             }
-            return doSteps(step(engimaUnderTest), steps - 1);
+            return doSteps(step(enigmaUnderTest), steps - 1);
         };
 
         test('simple steps', () => {
-            expect(engima.rotorPositions).toEqual([0, 0, 0]);
-            const steppedEngima = step(engima);
-            expect(steppedEngima.rotorPositions).toEqual([0, 0, 1]);
+            expect(enigma.rotorPositions).toEqual([0, 0, 0]);
+            const steppedenigma = step(enigma);
+            expect(steppedenigma.rotorPositions).toEqual([0, 0, 1]);
 
-            const twiceSteppedEngima = step(step(engima));
-            expect(twiceSteppedEngima.rotorPositions).toEqual([0, 0, 2]);
+            const twiceSteppedenigma = step(step(enigma));
+            expect(twiceSteppedenigma.rotorPositions).toEqual([0, 0, 2]);
         });
 
         test('wraps back to zero after going past position 25', () => {
-            const enigmaToTest = step(setRotorPosition(engima, [0, 0, 25]));
+            const enigmaToTest = step(setRotorPosition(enigma, [0, 0, 25]));
             expect(enigmaToTest.rotorPositions).toEqual([0, 0, 0]);
         });
 
         test('turnover', () => {
-            const enigmaToTest = setRotorPosition(engima, [0, 0, 20]); // 20 = U
+            const enigmaToTest = setRotorPosition(enigma, [0, 0, 20]); // 20 = U
             const afterStep1 = step(enigmaToTest);
             expect(afterStep1.rotorPositions).toEqual([0, 0, 21]);
 
@@ -54,7 +54,7 @@ describe('Stepping', () => {
         });
 
         test('double step', () => {
-            const enigmaToTest = setRotorPosition(engima, [0, 3, 20]); // A D U
+            const enigmaToTest = setRotorPosition(enigma, [0, 3, 20]); // A D U
 
             const afterStep1 = step(enigmaToTest);
             expect(afterStep1.rotorPositions).toEqual([0, 3, 21]); // A D V
@@ -70,7 +70,7 @@ describe('Stepping', () => {
         });
 
         test('repeated presses', () => {
-            const enigmaToTest = setRotorPosition(engima, [0, 0, 0]);
+            const enigmaToTest = setRotorPosition(enigma, [0, 0, 0]);
             const afterEncoding = doSteps(enigmaToTest, 200);
 
             expect(afterEncoding.rotorPositions).toEqual([1, 8, 18]); // B I S
@@ -78,11 +78,11 @@ describe('Stepping', () => {
 
         test("rotors that don't move", () => {
             // the Rotor.M4.GAMMA does not move
-            engima = createEnigma({
+            enigma = createEnigma({
                 rotors: [Rotor.M4.GAMMA, Rotor.M3.II, Rotor.M3.III],
                 reflector: Reflector.M3.A,
             });
-            const enigmaToTest = setRotorPosition(engima, [0, 0, 0]);
+            const enigmaToTest = setRotorPosition(enigma, [0, 0, 0]);
             const afterEncoding = doSteps(enigmaToTest, 200);
 
             expect(afterEncoding.rotorPositions).toEqual([0, 8, 18]); // A I S
@@ -90,29 +90,29 @@ describe('Stepping', () => {
     });
 
     describe('backward', () => {
-        const doSteps = (engimaUnderTest, steps): Enigma => {
+        const doSteps = (enigmaUnderTest, steps): Enigma => {
             if (steps === 0) {
-                return engimaUnderTest;
+                return enigmaUnderTest;
             }
-            return doSteps(stepBackwards(engimaUnderTest), steps - 1);
+            return doSteps(stepBackwards(enigmaUnderTest), steps - 1);
         };
 
         test('simple steps', () => {
-            const enigmaToTest = setRotorPosition(engima, [0, 0, 2]);
-            const steppedEngima = stepBackwards(enigmaToTest);
-            expect(steppedEngima.rotorPositions).toEqual([0, 0, 1]);
+            const enigmaToTest = setRotorPosition(enigma, [0, 0, 2]);
+            const steppedenigma = stepBackwards(enigmaToTest);
+            expect(steppedenigma.rotorPositions).toEqual([0, 0, 1]);
 
-            const twiceSteppedEngima = stepBackwards(stepBackwards(enigmaToTest));
-            expect(twiceSteppedEngima.rotorPositions).toEqual([0, 0, 0]);
+            const twiceSteppedenigma = stepBackwards(stepBackwards(enigmaToTest));
+            expect(twiceSteppedenigma.rotorPositions).toEqual([0, 0, 0]);
         });
 
         test('wraps back to 25 after going below position 0', () => {
-            const enigmaToTest = stepBackwards(setRotorPosition(engima, [0, 0, 0]));
+            const enigmaToTest = stepBackwards(setRotorPosition(enigma, [0, 0, 0]));
             expect(enigmaToTest.rotorPositions).toEqual([0, 0, 25]);
         });
 
         test('turnover', () => {
-            const enigmaToTest = setRotorPosition(engima, [0, 1, 22]);
+            const enigmaToTest = setRotorPosition(enigma, [0, 1, 22]);
             const afterStep1 = stepBackwards(enigmaToTest);
             expect(afterStep1.rotorPositions).toEqual([0, 0, 21]);
 
@@ -121,7 +121,7 @@ describe('Stepping', () => {
         });
 
         test('double step', () => {
-            const enigmaToTest = setRotorPosition(engima, [1, 5, 24]); // B F Y
+            const enigmaToTest = setRotorPosition(enigma, [1, 5, 24]); // B F Y
 
             const afterStep1 = stepBackwards(enigmaToTest);
             expect(afterStep1.rotorPositions).toEqual([1, 5, 23]); // B F X
@@ -137,7 +137,7 @@ describe('Stepping', () => {
         });
 
         test('repeated presses', () => {
-            const enigmaToTest = setRotorPosition(engima, [1, 8, 18]); // B I S
+            const enigmaToTest = setRotorPosition(enigma, [1, 8, 18]); // B I S
             const afterEncoding = doSteps(enigmaToTest, 200);
 
             expect(afterEncoding.rotorPositions).toEqual([0, 0, 0]); // A A A
@@ -145,11 +145,11 @@ describe('Stepping', () => {
 
         test("rotors that don't move", () => {
             // the Rotor.M4.GAMMA does not move
-            engima = createEnigma({
+            enigma = createEnigma({
                 rotors: [Rotor.M4.GAMMA, Rotor.M3.II, Rotor.M3.III],
                 reflector: Reflector.M3.A,
             });
-            const enigmaToTest = setRotorPosition(engima, [0, 8, 18]); // A I S
+            const enigmaToTest = setRotorPosition(enigma, [0, 8, 18]); // A I S
             const afterEncoding = doSteps(enigmaToTest, 200);
 
             expect(afterEncoding.rotorPositions).toEqual([0, 0, 0]); // A A A
@@ -158,46 +158,46 @@ describe('Stepping', () => {
 });
 
 describe('Encrypting / Decrypting', () => {
-    const engima = createEnigma({
+    const enigma = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.M3.B,
     });
     test('can do a simple encipherment', () => {
-        const testOutput = encodeString(engima, 'AAAA');
+        const testOutput = encodeString(enigma, 'AAAA');
         expect(testOutput).toEqual('BDZG');
     });
 
     test('can do a simple decipherment', () => {
-        const testOutput = encodeString(engima, 'BDZG');
+        const testOutput = encodeString(enigma, 'BDZG');
         expect(testOutput).toEqual('AAAA');
     });
 });
 
 describe('Plugboard', () => {
     test('can swap letters going in', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
             reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             plugs: [['A', 'K']],
         });
 
-        const testOutput = encodeString(engima, 'KKKK');
+        const testOutput = encodeString(enigma, 'KKKK');
         expect(testOutput).toEqual('BDZG');
     });
     test('the order of the letters does not matter', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
             reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             plugs: [['K', 'A']],
         });
 
-        const testOutput = encodeString(engima, 'KKKK');
+        const testOutput = encodeString(enigma, 'KKKK');
         expect(testOutput).toEqual('BDZG');
     });
     test('can swap letters going in both directions', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
             reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
@@ -207,31 +207,31 @@ describe('Plugboard', () => {
             ],
         });
 
-        const testOutput = encodeString(engima, 'KKKK');
+        const testOutput = encodeString(enigma, 'KKKK');
         expect(testOutput).toEqual('NDZG');
     });
 });
 
 describe('Modified ring settings', () => {
-    const engima = createEnigma({
+    const enigma = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.M3.B,
         ringSettings: [1, 1, 2],
     });
 
     test('can do a simple encipherment', () => {
-        const testOutput = encodeString(engima, 'AAAAA');
+        const testOutput = encodeString(enigma, 'AAAAA');
         expect(testOutput).toEqual('UBDZG');
     });
 
     test('can do a simple decipherment', () => {
-        const testOutput = encodeString(engima, 'UBDZG');
+        const testOutput = encodeString(enigma, 'UBDZG');
         expect(testOutput).toEqual('AAAAA');
     });
 });
 
 describe('Character sanitisation', () => {
-    const engima = step(
+    const enigma = step(
         createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
             reflector: Reflector.M3.B,
@@ -240,55 +240,55 @@ describe('Character sanitisation', () => {
     );
 
     test('lowercase characters are converted to uppercase', () => {
-        expect(encode(engima, 'a')).toEqual('B');
+        expect(encode(enigma, 'a')).toEqual('B');
     });
     test('numbers are ignored', () => {
-        expect(encode(engima, '3')).toEqual('');
+        expect(encode(enigma, '3')).toEqual('');
     });
     test('punctuation is ignored', () => {
-        expect(encode(engima, '.')).toEqual('');
-        expect(encode(engima, ',')).toEqual('');
-        expect(encode(engima, '*')).toEqual('');
+        expect(encode(enigma, '.')).toEqual('');
+        expect(encode(enigma, ',')).toEqual('');
+        expect(encode(enigma, '*')).toEqual('');
     });
 });
 
 describe('Text sanitisation', () => {
-    const engima = createEnigma({
+    const enigma = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
         reflector: Reflector.M3.B,
         ringSettings: [1, 1, 1],
     });
 
     test('lowercase characters are converted to uppercase', () => {
-        const testOutput = encodeString(engima, 'aaaa');
+        const testOutput = encodeString(enigma, 'aaaa');
         expect(testOutput).toEqual('BDZG');
     });
     test('non alpha characters are skipped', () => {
-        const testOutput = encodeString(engima, 'AA.AA');
+        const testOutput = encodeString(enigma, 'AA.AA');
         expect(testOutput).toEqual('BDZG');
     });
 });
 
 describe('Misc tests', () => {
     test('M3 - simple', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.II, Rotor.M3.III, Rotor.M3.I],
             reflector: Reflector.M3.B,
             ringSettings: [7, 18, 10],
             rotorPositions: [19, 18, 19],
         });
-        const testOutput = encodeString(engima, 'TESTING');
+        const testOutput = encodeString(enigma, 'TESTING');
         expect(testOutput).toEqual('IKMIJGR');
     });
     test('M3 - longer text', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.II, Rotor.M3.I, Rotor.M3.III],
             reflector: Reflector.M3.B,
             ringSettings: [7, 10, 18],
             rotorPositions: [3, 4, 20],
         });
         const testOutput = encodeString(
-            engima,
+            enigma,
             'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
         );
         expect(testOutput).toEqual(
@@ -296,27 +296,27 @@ describe('Misc tests', () => {
         );
     });
     test('M3 - rotors 4, 5, 6', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.IV, Rotor.M3.V, Rotor.M3.VI],
             reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             rotorPositions: [0, 0, 0],
         });
-        const testOutput = encodeString(engima, 'TESTING');
+        const testOutput = encodeString(enigma, 'TESTING');
         expect(testOutput).toEqual('UGRURWR');
     });
     test('M3 - rotors 7, 8', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M3.VI, Rotor.M3.VII, Rotor.M3.VIII],
             reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             rotorPositions: [0, 0, 0],
         });
-        const testOutput = encodeString(engima, 'TESTING');
+        const testOutput = encodeString(enigma, 'TESTING');
         expect(testOutput).toEqual('QWCMTQC');
 
         const testOutputLong = encodeString(
-            engima,
+            enigma,
             'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
         );
         expect(testOutputLong).toEqual(
@@ -325,25 +325,25 @@ describe('Misc tests', () => {
     });
 
     test('M4 - simple', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M4.GAMMA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
             reflector: Reflector.M4.B,
             ringSettings: [1, 1, 1, 1],
             rotorPositions: [0, 0, 0, 0],
         });
-        const testOutput = encodeString(engima, 'TESTING');
+        const testOutput = encodeString(enigma, 'TESTING');
         expect(testOutput).toEqual('MXORWRZ');
     });
 
     test('M4 - long', () => {
-        const engima = createEnigma({
+        const enigma = createEnigma({
             rotors: [Rotor.M4.GAMMA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
             reflector: Reflector.M4.B,
             ringSettings: [1, 1, 1, 1],
             rotorPositions: [0, 0, 0, 0],
         });
         const testOutputLong = encodeString(
-            engima,
+            enigma,
             'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
         );
         expect(testOutputLong).toEqual(
