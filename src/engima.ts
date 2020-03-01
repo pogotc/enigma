@@ -1,10 +1,15 @@
 import * as R from 'ramda';
 
+export interface PlugPair {
+    [index: number]: number;
+}
+
 export interface Enigma {
     rotors: Array<string>;
     reflector: string;
     rotorPositions: Array<number>;
     ringSettings: Array<number>;
+    plugs: Array<PlugPair>;
 }
 
 interface RotorWithTurnoverPos {
@@ -53,11 +58,32 @@ const Reflector = {
     B: 'YRUHQSLDPXNGOKMIEBFZCWVJAT',
 };
 
+const createPlugboardMap = plugs => {
+    if (plugs.length === 0) {
+        return {};
+    }
+
+    return R.reduce(
+        (plugboardMap, plugPair: PlugPair) => {
+            const from = plugPair[0];
+            const to = plugPair[1];
+            return {
+                ...plugboardMap,
+                [from]: to,
+                [to]: from,
+            };
+        },
+        {},
+        plugs,
+    );
+};
+
 const createEnigma = (setup): Enigma => ({
     rotors: setup.rotors,
     reflector: setup.reflector,
     rotorPositions: setup.rotorPositions || [0, 0, 0],
     ringSettings: setup.ringSettings || [1, 1, 1],
+    plugs: createPlugboardMap(setup.plugs || []),
 });
 
 const letterToRotorPos = (x: string): number => x.charCodeAt(0) - 'A'.charCodeAt(0);
@@ -257,6 +283,13 @@ const encode = (engima: Enigma, letter: string): string => {
         return '';
     }
 
+    const passThroughPlugboard = (plugMap: object, letter: string): string => {
+        if (plugMap[letter]) {
+            return plugMap[letter];
+        }
+        return letter;
+    };
+
     const encode = (rotors, wireLookupFn, input): string => {
         if (rotors.length === 0) {
             return input;
@@ -280,11 +313,13 @@ const encode = (engima: Enigma, letter: string): string => {
     const leftToRightEncode = R.partial(encode, [rotorsWithPositions, getLeftToRightWireMapping]);
 
     const performEncoding = R.compose(
+        R.partial(passThroughPlugboard, [engima.plugs]),
         rotorPosToLetter,
         leftToRightEncode,
         reflectorEncode,
         rightToLeftEncode,
         letterToRotorPos,
+        R.partial(passThroughPlugboard, [engima.plugs]),
     );
 
     return performEncoding(letter.toUpperCase());
