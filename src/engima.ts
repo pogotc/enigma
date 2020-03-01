@@ -1,5 +1,7 @@
 import * as R from 'ramda';
 
+import { RotorConfig } from './rotors';
+
 export interface PlugPair {
     [index: number]: number;
 }
@@ -18,45 +20,6 @@ interface RotorWithTurnoverPos {
 }
 
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-const Rotor = {
-    M3: {
-        I: 'M3_I',
-        II: 'M3_II',
-        III: 'M3_III',
-    },
-    M4: {
-        GAMMA: 'M4_GAMMA',
-    },
-};
-
-const RotorConfig = {
-    M3_I: {
-        wires: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ',
-        turnover: ['Q'],
-        rotates: true,
-    },
-    M3_II: {
-        wires: 'AJDKSIRUXBLHWTMCQGZNPYFVOE',
-        turnover: ['E'],
-        rotates: true,
-    },
-    M3_III: {
-        wires: 'BDFHJLCPRTXVZNYEIWGAKMUSQO',
-        turnover: ['V'],
-        rotates: true,
-    },
-    M4_GAMMA: {
-        wires: 'EKMFLGDQVZNTOWYHXUSPAIBRCJ',
-        turnover: ['Q'],
-        rotates: false,
-    },
-};
-
-const Reflector = {
-    A: 'EJMZALYXVBWFCRQUONTSPIKHGD',
-    B: 'YRUHQSLDPXNGOKMIEBFZCWVJAT',
-};
 
 const createPlugboardMap = plugs => {
     if (plugs.length === 0) {
@@ -125,12 +88,13 @@ const combineRotorsWithTurnovers = (rotors, positions): RotorWithTurnoverPos => 
 };
 
 const step = (engima: Enigma): Enigma => {
-    const stepRotors = (rotors, previousStepTurnedOver): Array<number> => {
+    const stepRotors = (rotors, previousStepTurnedOver, totalRotors): Array<number> => {
         if (rotors.length === 0) {
             return [];
         }
 
-        const isMiddleRotor = rotors.length === 2;
+        const rotorPos = rotors.length;
+        const isMiddleRotor = rotorPos > 1 && rotorPos < totalRotors;
         const rotor = R.head(rotors);
         let hitTurnover;
         let doStep = previousStepTurnedOver;
@@ -156,7 +120,7 @@ const step = (engima: Enigma): Enigma => {
                     position: doStep ? (rotor.position + 1) % 26 : rotor.position,
                 },
             ],
-            stepRotors(R.tail(rotors), hitTurnover),
+            stepRotors(R.tail(rotors), hitTurnover, totalRotors),
         );
     };
 
@@ -166,7 +130,7 @@ const step = (engima: Enigma): Enigma => {
     const performStep = R.compose(
         R.reverse,
         R.map(x => x.position),
-        R.partialRight(stepRotors, [true]),
+        R.partialRight(stepRotors, [true, engima.rotors.length]),
     );
 
     return {
@@ -341,4 +305,4 @@ const encodeString = (enigma: Enigma, input: string): string => {
     return performStringEncode(enigma, sanitisedInput);
 };
 
-export { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards, Rotor, Reflector };
+export { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards };

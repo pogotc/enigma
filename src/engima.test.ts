@@ -1,14 +1,15 @@
-import { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards, Rotor, Reflector } from './engima';
+import { createEnigma, encode, encodeString, step, setRotorPosition, stepBackwards } from './engima';
+import { Rotor, Reflector } from './rotors';
 import { Enigma } from './engima';
 
 test('can initialise the engima', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-        reflector: Reflector.A,
+        reflector: Reflector.M3.A,
     });
 
     expect(engima.rotors).toEqual([Rotor.M3.I, Rotor.M3.II, Rotor.M3.III]);
-    expect(engima.reflector).toEqual(Reflector.A);
+    expect(engima.reflector).toEqual(Reflector.M3.A);
     expect(engima.rotorPositions).toEqual([0, 0, 0]);
 });
 
@@ -17,7 +18,7 @@ describe('Stepping', () => {
     beforeEach(() => {
         engima = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-            reflector: Reflector.A,
+            reflector: Reflector.M3.A,
         });
     });
 
@@ -79,7 +80,7 @@ describe('Stepping', () => {
             // the Rotor.M4.GAMMA does not move
             engima = createEnigma({
                 rotors: [Rotor.M4.GAMMA, Rotor.M3.II, Rotor.M3.III],
-                reflector: Reflector.A,
+                reflector: Reflector.M3.A,
             });
             const enigmaToTest = setRotorPosition(engima, [0, 0, 0]);
             const afterEncoding = doSteps(enigmaToTest, 200);
@@ -146,7 +147,7 @@ describe('Stepping', () => {
             // the Rotor.M4.GAMMA does not move
             engima = createEnigma({
                 rotors: [Rotor.M4.GAMMA, Rotor.M3.II, Rotor.M3.III],
-                reflector: Reflector.A,
+                reflector: Reflector.M3.A,
             });
             const enigmaToTest = setRotorPosition(engima, [0, 8, 18]); // A I S
             const afterEncoding = doSteps(enigmaToTest, 200);
@@ -159,7 +160,7 @@ describe('Stepping', () => {
 describe('Encrypting / Decrypting', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-        reflector: Reflector.B,
+        reflector: Reflector.M3.B,
     });
     test('can do a simple encipherment', () => {
         const testOutput = encodeString(engima, 'AAAA');
@@ -176,7 +177,7 @@ describe('Plugboard', () => {
     test('can swap letters going in', () => {
         const engima = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             plugs: [['A', 'K']],
         });
@@ -187,7 +188,7 @@ describe('Plugboard', () => {
     test('the order of the letters does not matter', () => {
         const engima = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             plugs: [['K', 'A']],
         });
@@ -198,7 +199,7 @@ describe('Plugboard', () => {
     test('can swap letters going in both directions', () => {
         const engima = createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
             plugs: [
                 ['A', 'K'],
@@ -214,7 +215,7 @@ describe('Plugboard', () => {
 describe('Modified ring settings', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-        reflector: Reflector.B,
+        reflector: Reflector.M3.B,
         ringSettings: [1, 1, 2],
     });
 
@@ -233,7 +234,7 @@ describe('Character sanitisation', () => {
     const engima = step(
         createEnigma({
             rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [1, 1, 1],
         }),
     );
@@ -254,7 +255,7 @@ describe('Character sanitisation', () => {
 describe('Text sanitisation', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
-        reflector: Reflector.B,
+        reflector: Reflector.M3.B,
         ringSettings: [1, 1, 1],
     });
 
@@ -269,20 +270,20 @@ describe('Text sanitisation', () => {
 });
 
 describe('Misc tests', () => {
-    test('text one', () => {
+    test('M3 - simple', () => {
         const engima = createEnigma({
             rotors: [Rotor.M3.II, Rotor.M3.III, Rotor.M3.I],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [7, 18, 10],
             rotorPositions: [19, 18, 19],
         });
         const testOutput = encodeString(engima, 'TESTING');
         expect(testOutput).toEqual('IKMIJGR');
     });
-    test('text two', () => {
+    test('M3 - longer text', () => {
         const engima = createEnigma({
             rotors: [Rotor.M3.II, Rotor.M3.I, Rotor.M3.III],
-            reflector: Reflector.B,
+            reflector: Reflector.M3.B,
             ringSettings: [7, 10, 18],
             rotorPositions: [3, 4, 20],
         });
@@ -292,6 +293,61 @@ describe('Misc tests', () => {
         );
         expect(testOutput).toEqual(
             'THQCFRKJOJRRAEUVHOQUOUGLBWNPUXQXGNJVHRBXUAHOAPKGDQCXZQIANARSIOUFQOTYKSRPEDSXDITKCOTNUEKJQBBGGBLDYEGRGEMLGMLQURKMAYKKGMPXPHEMQFSDEUAXGQSBZLWZQCNLTTTEOBLCLLVPYKBDFHAKTCQVMMYZWYOWTENWPNYEAPFKBIYNWZAZKLFRETBLNTYQCCWFSCQVSPGBRYCVRZIATVGIVOLPIGWQPNVZMGEULBXPHPMXVVPRDXCRZYDRUZRNYEENWZFUIZQNXAETRCYSNJPRZWADTEWNJJXTZOXYQAXXOPMOHCDEKKMEITXPHXYVMOJMRAOJVWBIFDTNKHAAZPITHERNRIWQJ',
+        );
+    });
+    test('M3 - rotors 4, 5, 6', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.IV, Rotor.M3.V, Rotor.M3.VI],
+            reflector: Reflector.M3.B,
+            ringSettings: [1, 1, 1],
+            rotorPositions: [0, 0, 0],
+        });
+        const testOutput = encodeString(engima, 'TESTING');
+        expect(testOutput).toEqual('UGRURWR');
+    });
+    test('M3 - rotors 7, 8', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.VI, Rotor.M3.VII, Rotor.M3.VIII],
+            reflector: Reflector.M3.B,
+            ringSettings: [1, 1, 1],
+            rotorPositions: [0, 0, 0],
+        });
+        const testOutput = encodeString(engima, 'TESTING');
+        expect(testOutput).toEqual('QWCMTQC');
+
+        const testOutputLong = encodeString(
+            engima,
+            'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
+        );
+        expect(testOutputLong).toEqual(
+            'OLTWRPVNSZYVHUWGWNQOMRAMSKGOGVNXOOIJVTNIATQRSNHKIUCWHWOMFVNZMVQEHTJEFADMFOMZSUFXLWCOIQGMZMIJORTNRYMZZMINHZCZSJFEJWPTMBESYAHMBKMERFPRJFVNVPMFFVNWKYSFJMIICEEGALMWMOTYGKGMXQESMVIXVNVLJGOUFXVVVGQBSDDFCHJKGSBMYTISXRXJSHYAJNXAGHSBAQMBNTQACCJJZINFPHBJAFDJHZQADLHUFJXYCCWUZQVVLLXKABCDFACYFDYVSPIHXDKXIDVUQSKCBWXGQFDTLLHPXQKCPGGVKYMXTZCHXBNEMJQHWBCTBIJEHBJHJXBNHZVORWHFVFRKIQNEB',
+        );
+    });
+
+    test('M4 - simple', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M4.GAMMA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
+            reflector: Reflector.M4.B,
+            ringSettings: [1, 1, 1, 1],
+            rotorPositions: [0, 0, 0, 0],
+        });
+        const testOutput = encodeString(engima, 'TESTING');
+        expect(testOutput).toEqual('MXORWRZ');
+    });
+
+    test('M4 - long', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M4.GAMMA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
+            reflector: Reflector.M4.B,
+            ringSettings: [1, 1, 1, 1],
+            rotorPositions: [0, 0, 0, 0],
+        });
+        const testOutputLong = encodeString(
+            engima,
+            'LOREMIPSUMDOLORSITAMETCONSECTETURADIPISCINGELITSEDDOEIUSMODTEMPORINCIDIDUNTUTLABOREETDOLOREMAGNAALIQUAUTENIMADMINIMVENIAMQUISNOSTRUDEXERCITATIONULLAMCOLABORISNISIUTALIQUIPEXEACOMMODOCONSEQUATDUISAUTEIRUREDOLORINREPREHENDERITINVOLUPTATEVELITESSECILLUMDOLOREEUFUGIATNULLAPARIATUREXCEPTEURSINTOCCAECATCUPIDATATNONPROIDENTSUNTINCULPAQUIOFFICIADESERUNTMOLLITANIMIDESTLABORUM',
+        );
+        expect(testOutputLong).toEqual(
+            'CUWVRTSIFJIHMBBZNDPRONJLRRLUPFJCHCENKVOWPWQBWBSOKFTTMTFGBVLBPSDILBZZRIOKJDORXYHRRJHUHCKNHARGWSCJTTLRYVWOTUZZJJQXQHSUHLHQCBOFCPROKYYAQFKNGMWFPPUFWCRIHRMJSGNBENHKYHMFNJUCVVSLFYHGEVEMXJSBWEZTRTRUBVXUYSKKKFHMJXSYQBQHSUBLRTPIYIVSTIRJNTZJOJHULBUPBMIDRCPINFZVDHEQLFBJZDOUBFXQSRVIDLZMQOZDGKAMBUGCDFALDYRPBQXQQWFLIBGINVBASYEFYCLQPMSFKFDMCPEJNCSWYLNWIGSIWUGIBADMRDZZZWGRRZRECNIOX',
         );
     });
 });
