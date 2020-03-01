@@ -87,7 +87,7 @@ const combineRotorsWithTurnovers = (rotors, positions): RotorWithTurnoverPos => 
     return R.zipWith((rotor, data) => ({ ...data, rotor }), rotors, positionsWithTurnovers);
 };
 
-const step = (engima: Enigma): Enigma => {
+const step = (enigma: Enigma): Enigma => {
     const stepRotors = (rotors, previousStepTurnedOver, totalRotors): Array<number> => {
         if (rotors.length === 0) {
             return [];
@@ -124,22 +124,22 @@ const step = (engima: Enigma): Enigma => {
         );
     };
 
-    const rotorsWithTurnovers = combineRotorsWithTurnovers(engima.rotors, engima.rotorPositions);
+    const rotorsWithTurnovers = combineRotorsWithTurnovers(enigma.rotors, enigma.rotorPositions);
     const reversedRotors = R.reverse(rotorsWithTurnovers);
 
     const performStep = R.compose(
         R.reverse,
         R.map(x => x.position),
-        R.partialRight(stepRotors, [true, engima.rotors.length]),
+        R.partialRight(stepRotors, [true, enigma.rotors.length]),
     );
 
     return {
-        ...engima,
+        ...enigma,
         rotorPositions: performStep(reversedRotors),
     };
 };
 
-const stepBackwards = (engima: Enigma): Enigma => {
+const stepBackwards = (enigma: Enigma): Enigma => {
     const stepRotorsBackwards = (rotors, previousStepTurnedOver, previousRotorWillDoubleStep): Array<number> => {
         if (rotors.length === 0) {
             return [];
@@ -191,7 +191,7 @@ const stepBackwards = (engima: Enigma): Enigma => {
         );
     };
 
-    const rotorsWithTurnovers = combineRotorsWithTurnovers(engima.rotors, engima.rotorPositions);
+    const rotorsWithTurnovers = combineRotorsWithTurnovers(enigma.rotors, enigma.rotorPositions);
     const reversedRotors = R.reverse(rotorsWithTurnovers);
 
     const performStep = R.compose(
@@ -201,7 +201,7 @@ const stepBackwards = (engima: Enigma): Enigma => {
     );
 
     return {
-        ...engima,
+        ...enigma,
         rotorPositions: performStep(reversedRotors),
     };
 };
@@ -240,8 +240,8 @@ const zip3 = (a, b, c): Array<any> => {
     return R.prepend([aHead, bHead, cHead], zip3(R.tail(a), R.tail(b), R.tail(c)));
 };
 
-const encode = (engima: Enigma, letter: string): string => {
-    const rotorsWithPositions = zip3(engima.rotors, engima.rotorPositions, engima.ringSettings);
+const encode = (enigma: Enigma, letter: string): string => {
+    const rotorsWithPositions = zip3(enigma.rotors, enigma.rotorPositions, enigma.ringSettings);
 
     if (!isEncodeable(letter)) {
         return '';
@@ -273,17 +273,17 @@ const encode = (engima: Enigma, letter: string): string => {
     };
 
     const rightToLeftEncode = R.partial(encode, [R.reverse(rotorsWithPositions), getRightToLeftWireMapping]);
-    const reflectorEncode = R.partial(reflect, [engima.reflector]);
+    const reflectorEncode = R.partial(reflect, [enigma.reflector]);
     const leftToRightEncode = R.partial(encode, [rotorsWithPositions, getLeftToRightWireMapping]);
 
     const performEncoding = R.compose(
-        R.partial(passThroughPlugboard, [engima.plugs]),
+        R.partial(passThroughPlugboard, [enigma.plugs]),
         rotorPosToLetter,
         leftToRightEncode,
         reflectorEncode,
         rightToLeftEncode,
         letterToRotorPos,
-        R.partial(passThroughPlugboard, [engima.plugs]),
+        R.partial(passThroughPlugboard, [enigma.plugs]),
     );
 
     return performEncoding(letter.toUpperCase());
