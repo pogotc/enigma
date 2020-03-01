@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/pogotc/enigma/tree/master.svg?style=svg&circle-token=08221b3b1af44bd8e3f7f117e7b1432806ef0105)](https://circleci.com/gh/pogotc/enigma/tree/master)
+
 # Enigma
 
 ## Using Engima
