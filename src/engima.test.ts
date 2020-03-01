@@ -172,6 +172,45 @@ describe('Encrypting / Decrypting', () => {
     });
 });
 
+describe('Plugboard', () => {
+    test('can swap letters going in', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+            reflector: Reflector.B,
+            ringSettings: [1, 1, 1],
+            plugs: [['A', 'K']],
+        });
+
+        const testOutput = encodeString(engima, 'KKKK');
+        expect(testOutput).toEqual('BDZG');
+    });
+    test('the order of the letters does not matter', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+            reflector: Reflector.B,
+            ringSettings: [1, 1, 1],
+            plugs: [['K', 'A']],
+        });
+
+        const testOutput = encodeString(engima, 'KKKK');
+        expect(testOutput).toEqual('BDZG');
+    });
+    test('can swap letters going in both directions', () => {
+        const engima = createEnigma({
+            rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
+            reflector: Reflector.B,
+            ringSettings: [1, 1, 1],
+            plugs: [
+                ['A', 'K'],
+                ['B', 'N'],
+            ],
+        });
+
+        const testOutput = encodeString(engima, 'KKKK');
+        expect(testOutput).toEqual('NDZG');
+    });
+});
+
 describe('Modified ring settings', () => {
     const engima = createEnigma({
         rotors: [Rotor.M3.I, Rotor.M3.II, Rotor.M3.III],
