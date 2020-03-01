@@ -32,11 +32,11 @@ describe('Stepping', () => {
 
         test('simple steps', () => {
             expect(enigma.rotorPositions).toEqual([0, 0, 0]);
-            const steppedenigma = step(enigma);
-            expect(steppedenigma.rotorPositions).toEqual([0, 0, 1]);
+            const steppedEnigma = step(enigma);
+            expect(steppedEnigma.rotorPositions).toEqual([0, 0, 1]);
 
-            const twiceSteppedenigma = step(step(enigma));
-            expect(twiceSteppedenigma.rotorPositions).toEqual([0, 0, 2]);
+            const twicesteppedEnigma = step(step(enigma));
+            expect(twicesteppedEnigma.rotorPositions).toEqual([0, 0, 2]);
         });
 
         test('wraps back to zero after going past position 25', () => {
@@ -99,11 +99,11 @@ describe('Stepping', () => {
 
         test('simple steps', () => {
             const enigmaToTest = setRotorPosition(enigma, [0, 0, 2]);
-            const steppedenigma = stepBackwards(enigmaToTest);
-            expect(steppedenigma.rotorPositions).toEqual([0, 0, 1]);
+            const steppedEnigma = stepBackwards(enigmaToTest);
+            expect(steppedEnigma.rotorPositions).toEqual([0, 0, 1]);
 
-            const twiceSteppedenigma = stepBackwards(stepBackwards(enigmaToTest));
-            expect(twiceSteppedenigma.rotorPositions).toEqual([0, 0, 0]);
+            const twicesteppedEnigma = stepBackwards(stepBackwards(enigmaToTest));
+            expect(twicesteppedEnigma.rotorPositions).toEqual([0, 0, 0]);
         });
 
         test('wraps back to 25 after going below position 0', () => {
@@ -349,5 +349,18 @@ describe('Misc tests', () => {
         expect(testOutputLong).toEqual(
             'CUWVRTSIFJIHMBBZNDPRONJLRRLUPFJCHCENKVOWPWQBWBSOKFTTMTFGBVLBPSDILBZZRIOKJDORXYHRRJHUHCKNHARGWSCJTTLRYVWOTUZZJJQXQHSUHLHQCBOFCPROKYYAQFKNGMWFPPUFWCRIHRMJSGNBENHKYHMFNJUCVVSLFYHGEVEMXJSBWEZTRTRUBVXUYSKKKFHMJXSYQBQHSUBLRTPIYIVSTIRJNTZJOJHULBUPBMIDRCPINFZVDHEQLFBJZDOUBFXQSRVIDLZMQOZDGKAMBUGCDFALDYRPBQXQQWFLIBGINVBASYEFYCLQPMSFKFDMCPEJNCSWYLNWIGSIWUGIBADMRDZZZWGRRZRECNIOX',
         );
+    });
+
+    test('m4 -readme', () => {
+        const enigma = createEnigma({
+            rotors: [Rotor.M4.BETA, Rotor.M3.III, Rotor.M3.II, Rotor.M3.I],
+            reflector: Reflector.M4.B,
+            ringSettings: [20, 5, 19, 20],      // TEST
+            rotorPositions: [18, 2, 17, 19],    // SCRT
+            plugs: [['Q', 'A'], ['T', 'G'], ['E', 'N'], ['D', 'X']]
+        });
+
+        const testOutput = encodeString(enigma, 'ATTACKATDAWN');
+        expect(testOutput).toEqual('LRVCNQOUIYYG');
     });
 });
